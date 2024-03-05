@@ -85,9 +85,7 @@ void Robot::TeleopPeriodic() {
   // Outtake
   else if (lTrigger > 0) {
     topOutTakeMotor.Set(lTrigger);
-    if (topOutTakeMotorSpeed > 10) {
-      midOutTakeMotor.Set(0.2);
-    }
+    midOutTakeMotor.Set(0.2);
   }
   
 }
