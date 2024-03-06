@@ -24,14 +24,45 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 //XBox Controller
 frc::XboxController manipulatorController(0);
 
-//intake and outtake
-void launcher (double topOutTakeMotorSpeed, double midOutTakeMotorSpeed) {
+//intake and outtake function
+void launcher(double topOutTakeMotorSpeed, double midOutTakeMotorSpeed, bool ejectStatus) {
+  // Intake
   if (topOutTakeMotorSpeed > 0) {
     intakeMoter.Set(topOutTakeMotorSpeed);
-  } 
+  }
+  // Outtake
   else if (midOutTakeMotorSpeed > 0) {
     topOutTakeMotor.Set(midOutTakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
+  }
+  // Eject status
+  if (ejectStatus == true) {
+    topOutTakeMotor.Set(-0.2);
+    midOutTakeMotor.Set(-0.2);
+  } 
+}
+
+//lifter function
+void lifter(double rSideSpeed, double lSideSpeed) {
+  // Right Lifter
+  if (rSideSpeed > 0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
+  }
+  else if (rSideSpeed < -0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed * -1);
+  }
+  else {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+  }
+  // Left Lifter
+  if (lSideSpeed > 0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed);
+  }
+  else if (lSideSpeed < -0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed * -1);
+  }
+  else {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
 }
 
@@ -88,6 +119,8 @@ void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic() {
   double rTrigger = manipulatorController.GetRightTriggerAxis();
   double lTrigger = manipulatorController.GetLeftTriggerAxis();
+
+  bool lBumper = manipulatorController.GetLeftBumper();
   
   double rJoyStick = manipulatorController.GetRightY() * -1;
   double lJoyStick = manipulatorController.GetLeftY() * -1;
@@ -95,29 +128,11 @@ void Robot::TeleopPeriodic() {
   double topOutTakeMotorSpeed = rTrigger;
   double midOutTakeMotorSpeed = lTrigger;
 
-  launcher(topOutTakeMotorSpeed, midOutTakeMotorSpeed);
+  double rSideSpeed = rJoyStick;
+  double lSideSpeed = lJoyStick;
 
-  // Right Lifter
-  if (rJoyStick > 0.05) {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rJoyStick);
-  }
-  else if (rJoyStick < -0.05) {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rJoyStick * -1);
-  }
-  else {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
-  }
-
-  // Left Lifter
-  if (lJoyStick > 0.05) {
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lJoyStick);
-  }
-  else if (lJoyStick < -0.05) {
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lJoyStick * -1);
-  }
-  else {
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
-  }
+  launcher(topOutTakeMotorSpeed, midOutTakeMotorSpeed, lBumper);
+  lifter(rSideSpeed, lSideSpeed);
 }
 void Robot::DisabledInit() {}
 
