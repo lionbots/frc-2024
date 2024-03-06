@@ -16,11 +16,19 @@ rev::CANSparkMax intakeMoter(1, rev::CANSparkMaxLowLevel::MotorType::kBrushless)
 rev::CANSparkMax topOutTakeMotor(2, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax midOutTakeMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 
-// Encoder
-rev::SparkMaxAbsoluteEncoder topOutTakeMotorEncoder = topOutTakeMotor.GetAbsoluteEncoder(rev::SparkAbsoluteEncoder::Type::kDutyCycle);
-
 //XBox Controller
 frc::XboxController manipulatorController(0);
+
+//intake and outtake
+void launcher (double topOutTakeMotorSpeed, double midOutTakeMotorSpeed) {
+  if (topOutTakeMotorSpeed > 0) {
+    intakeMoter.Set(topOutTakeMotorSpeed);
+  } 
+  else if (midOutTakeMotorSpeed > 0) {
+    topOutTakeMotor.Set(midOutTakeMotorSpeed);
+    midOutTakeMotor.Set(0.2);
+  }
+}
 
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
@@ -76,18 +84,10 @@ void Robot::TeleopPeriodic() {
   double rTrigger = manipulatorController.GetRightTriggerAxis();
   double lTrigger = manipulatorController.GetLeftTriggerAxis();
   
-  double topOutTakeMotorSpeed = topOutTakeMotorEncoder.GetVelocity();	
+  double topOutTakeMotorSpeed = rTrigger;
+  double midOutTakeMotorSpeed = lTrigger;
 
-  // Intake
-  if (rTrigger > 0) {
-    intakeMoter.Set(rTrigger);
-  } 
-  // Outtake
-  else if (lTrigger > 0) {
-    topOutTakeMotor.Set(lTrigger);
-    midOutTakeMotor.Set(0.2);
-  }
-  
+  launcher(topOutTakeMotorSpeed, midOutTakeMotorSpeed);
 }
 void Robot::DisabledInit() {}
 
