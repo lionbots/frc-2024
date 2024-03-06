@@ -10,11 +10,16 @@
 #include <rev/CANSparkMax.h>
 #include <rev/CANSparkMaxLowLevel.h>
 #include <rev/SparkMaxAbsoluteEncoder.h>
+#include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
 
 //Motor Controller For Intake
 rev::CANSparkMax intakeMoter(1, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax topOutTakeMotor(2, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax midOutTakeMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+
+//Motors Controller For Lifter
+ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{1};
+ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 
 //XBox Controller
 frc::XboxController manipulatorController(0);
@@ -84,10 +89,35 @@ void Robot::TeleopPeriodic() {
   double rTrigger = manipulatorController.GetRightTriggerAxis();
   double lTrigger = manipulatorController.GetLeftTriggerAxis();
   
+  double rJoyStick = manipulatorController.GetRightY() * -1;
+  double lJoyStick = manipulatorController.GetLeftY() * -1;
+  
   double topOutTakeMotorSpeed = rTrigger;
   double midOutTakeMotorSpeed = lTrigger;
 
   launcher(topOutTakeMotorSpeed, midOutTakeMotorSpeed);
+
+  // Right Lifter
+  if (rJoyStick > 0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rJoyStick);
+  }
+  else if (rJoyStick < -0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rJoyStick * -1);
+  }
+  else {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+  }
+
+  // Left Lifter
+  if (lJoyStick > 0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lJoyStick);
+  }
+  else if (lJoyStick < -0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lJoyStick * -1);
+  }
+  else {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+  }
 }
 void Robot::DisabledInit() {}
 
