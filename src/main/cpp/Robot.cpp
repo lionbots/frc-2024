@@ -13,9 +13,10 @@
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
 
 //Motor Controller For Intake
-rev::CANSparkMax intakeMoter(1, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax topOutTakeMotor(2, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax midOutTakeMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax intakeMoter(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 
 //Motors Controller For Lifter
 ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{1};
@@ -25,19 +26,17 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 frc::XboxController manipulatorController(0);
 
 //intake and outtake function
-void launcher(double topOutTakeMotorSpeed, double midOutTakeMotorSpeed, bool ejectStatus) {
-  // Intake
-  if (topOutTakeMotorSpeed > 0) {
-    intakeMoter.Set(topOutTakeMotorSpeed);
-  }
+void launcher(double outTakeMotorSpeed, bool ejectStatus) {
   // Outtake
-  else if (midOutTakeMotorSpeed > 0) {
-    topOutTakeMotor.Set(midOutTakeMotorSpeed);
+  if (outTakeMotorSpeed > 0) {
+    upTopOutTakeMotor.Set(outTakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
+    bottomTopOutTakeMotor.Set(outTakeMotorSpeed * -1);
   }
   // Eject status
   if (ejectStatus == true) {
-    topOutTakeMotor.Set(-0.2);
+    upTopOutTakeMotor.Set(-0.2);
+    bottomTopOutTakeMotor.Set(0.2);
     midOutTakeMotor.Set(-0.2);
   } 
 }
@@ -124,15 +123,9 @@ void Robot::TeleopPeriodic() {
   
   double rJoyStick = manipulatorController.GetRightY() * -1;
   double lJoyStick = manipulatorController.GetLeftY() * -1;
-  
-  double topOutTakeMotorSpeed = rTrigger;
-  double midOutTakeMotorSpeed = lTrigger;
 
-  double rSideSpeed = rJoyStick;
-  double lSideSpeed = lJoyStick;
-
-  launcher(topOutTakeMotorSpeed, midOutTakeMotorSpeed, lBumper);
-  lifter(rSideSpeed, lSideSpeed);
+  launcher(rTrigger, lBumper);
+  lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
 
