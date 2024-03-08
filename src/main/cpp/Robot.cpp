@@ -16,6 +16,10 @@
 #include <ctre/Phoenix.h>
 #include <rev/CANSparkMax.h>
 #include <rev/CANSparkMaxLowLevel.h>
+#include <chrono>
+
+// Used for auto (time based)
+auto autoStartTime = std::chrono::high_resolution_clock::now();
 
 //Motor controller for Drive system
 rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
@@ -43,6 +47,15 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 
 //XBox Controller
 frc::XboxController manipulatorController(0);
+
+// auto for getting leave points.
+void autoLeave() {
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+    d_drive.ArcadeDrive(0, 0.5, true);
+  } else {
+    d_drive.ArcadeDrive(0, 0.0, true);
+  }
+}
 
 //intake and outtake function
 void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
