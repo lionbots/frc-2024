@@ -36,7 +36,7 @@ frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 frc::XboxController driveController(5);
 
 //Motor Controller For Intake
-rev::CANSparkMax intakeMoter(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax intakeMotor(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
@@ -71,6 +71,8 @@ void autoSpeakerLeave() {
     midOutTakeMotor.Set(0.2);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10000) + autoStartTime) {
     d_drive.ArcadeDrive(0, -0.5, true);
+    setTopLauncher(0);
+    midOutTakeMotor.Set(0);
   } else {
     d_drive.ArcadeDrive(0, 0.0, true);
   }
@@ -80,21 +82,29 @@ void autoSpeakerLeave() {
 void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
   // Intake
   if (intakeMotorSpeed > 1) {
-    intakeMoter.Set(1);
+    intakeMotor.Set(1);
+    midOutTakeMotor.Set(0.2);
   }
   else if (intakeMotorSpeed > 0) {
-    intakeMoter.Set(intakeMotorSpeed);
+    intakeMotor.Set(intakeMotorSpeed);
+    midOutTakeMotor.Set(0.2);
+  } else {
+    intakeMotor.Set(0);
   }
   // Outtake
   if (outTakeMotorSpeed > 0) {
     setTopLauncher(outTakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
+  } else {
+    setTopLauncher(0);
+    midOutTakeMotor.Set(0);
   }
   // Eject status
-  if (ejectStatus == true) {
+  if (ejectStatus) {
     setTopLauncher(-0.2);
     midOutTakeMotor.Set(-0.2);
-  } 
+    intakeMotor.Set(-0.2);
+  }
 }
 
 //lifter function
@@ -122,6 +132,7 @@ void lifter(double rSideSpeed, double lSideSpeed) {
 }
 
 void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
+    // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
     d_drive.ArcadeDrive(dir, forwardSpd * -1, true);
@@ -199,17 +210,18 @@ void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
   //Drive controller
-  double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
-  double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
-  double driveControllerLeftJoyStickX = driveController.GetLeftX();
+  /* Forwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
+  /* Backwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
+  /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
 
-  double rTrigger = manipulatorController.GetRightTriggerAxis();
-  double lTrigger = manipulatorController.GetLeftTriggerAxis();
+  //Manipulator controller
+  /* Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Intake  - Left Trigger*/double lTrigger = manipulatorController.GetLeftTriggerAxis();
 
-  bool lBumper = manipulatorController.GetLeftBumper();
+  /* Eject - Left Bumber*/bool lBumper = manipulatorController.GetLeftBumper();
   
-  double rJoyStick = manipulatorController.GetRightY() * -1;
-  double lJoyStick = manipulatorController.GetLeftY() * -1;
+  /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY() * -1;
+  /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
   launcher(rTrigger, lTrigger, lBumper);
