@@ -49,9 +49,14 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 frc::XboxController manipulatorController(0);
 
 // function for running top launcher
-void setTopLauncher(double launcherSpeed) {
-  upTopOutTakeMotor.Set(launcherSpeed);
-  bottomTopOutTakeMotor.Set(launcherSpeed);
+void setTopLauncher(double launcherSpeed, bool sameDir) {
+  if (!sameDir) {
+    upTopOutTakeMotor.Set(launcherSpeed);
+    bottomTopOutTakeMotor.Set(launcherSpeed);
+  } else {
+    upTopOutTakeMotor.Set(launcherSpeed * -1);
+    bottomTopOutTakeMotor.Set(launcherSpeed);
+  }
 }
 
 // auto for getting leave points.
@@ -65,13 +70,13 @@ void autoLeave() {
 
 void autoSpeakerLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime) {
-    setTopLauncher(1);
+    setTopLauncher(1, false);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
-    setTopLauncher(1);
+    setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10000) + autoStartTime) {
     d_drive.ArcadeDrive(0, -0.5, true);
-    setTopLauncher(0);
+    setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   } else {
     d_drive.ArcadeDrive(0, 0.0, true);
@@ -79,7 +84,7 @@ void autoSpeakerLeave() {
 }
 
 //intake and outtake function
-void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
+void launcherSpeaker(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
   // Intake
   if (intakeMotorSpeed > 1) {
     intakeMotor.Set(1);
@@ -93,17 +98,23 @@ void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatu
   }
   // Outtake
   if (outTakeMotorSpeed > 0) {
-    setTopLauncher(outTakeMotorSpeed);
+    setTopLauncher(outTakeMotorSpeed, false);
     midOutTakeMotor.Set(0.2);
   } else {
-    setTopLauncher(0);
+    setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   }
   // Eject status
   if (ejectStatus) {
-    setTopLauncher(-0.2);
+    setTopLauncher(-0.2, false);
     midOutTakeMotor.Set(-0.2);
     intakeMotor.Set(-0.2);
+  }
+}
+
+void launcherAmp(bool enable) {
+  if (enable) {
+    setTopLauncher(-0.2, 0.2);
   }
 }
 
@@ -215,7 +226,8 @@ void Robot::TeleopPeriodic() {
   /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
 
   //Manipulator controller
-  /* Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Speaker Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
   /* Intake  - Left Trigger*/double lTrigger = manipulatorController.GetLeftTriggerAxis();
 
   /* Eject - Left Bumber*/bool lBumper = manipulatorController.GetLeftBumper();
@@ -224,7 +236,8 @@ void Robot::TeleopPeriodic() {
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  launcher(rTrigger, lTrigger, lBumper);
+  launcherSpeaker(rTrigger, lTrigger, lBumper);
+  launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
