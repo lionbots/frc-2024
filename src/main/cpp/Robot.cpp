@@ -31,6 +31,66 @@ frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 //XBox Controller
 frc::XboxController driveController(5);
 
+//Motor Controller For Intake
+rev::CANSparkMax intakeMoter(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+
+//Motors Controller For Lifter
+ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{1};
+ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
+
+//XBox Controller
+frc::XboxController manipulatorController(0);
+
+//intake and outtake function
+void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
+  // Intake
+  if (intakeMotorSpeed > 1) {
+    intakeMoter.Set(1);
+  }
+  else if (intakeMotorSpeed > 0) {
+    intakeMoter.Set(intakeMotorSpeed);
+  }
+  // Outtake
+  if (outTakeMotorSpeed > 0) {
+    upTopOutTakeMotor.Set(outTakeMotorSpeed);
+    midOutTakeMotor.Set(0.2);
+    bottomTopOutTakeMotor.Set(outTakeMotorSpeed);
+  }
+  // Eject status
+  if (ejectStatus == true) {
+    upTopOutTakeMotor.Set(-0.2);
+    bottomTopOutTakeMotor.Set(-0.2);
+    midOutTakeMotor.Set(-0.2);
+  } 
+}
+
+//lifter function
+void lifter(double rSideSpeed, double lSideSpeed) {
+  // Right Lifter
+  if (rSideSpeed > 0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
+  }
+  else if (rSideSpeed < -0.05) {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed * -1);
+  }
+  else {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+  }
+  // Left Lifter
+  if (lSideSpeed > 0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed);
+  }
+  else if (lSideSpeed < -0.05) {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed * -1);
+  }
+  else {
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+  }
+}
+
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -112,7 +172,17 @@ void Robot::TeleopPeriodic() {
     d_drive.ArcadeDrive(0, 0, true);
   }
 }
+  double rTrigger = manipulatorController.GetRightTriggerAxis();
+  double lTrigger = manipulatorController.GetLeftTriggerAxis();
 
+  bool lBumper = manipulatorController.GetLeftBumper();
+  
+  double rJoyStick = manipulatorController.GetRightY() * -1;
+  double lJoyStick = manipulatorController.GetLeftY() * -1;
+
+  launcher(rTrigger, lTrigger, lBumper);
+  lifter(rJoyStick, lJoyStick);
+}
 void Robot::DisabledInit() {}
 
 void Robot::DisabledPeriodic() {}
