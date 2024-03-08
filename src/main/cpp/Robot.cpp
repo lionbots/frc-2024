@@ -26,17 +26,24 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 frc::XboxController manipulatorController(0);
 
 //intake and outtake function
-void launcher(double outTakeMotorSpeed, bool ejectStatus) {
+void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
+  // Intake
+  if (intakeMotorSpeed > 1) {
+    intakeMoter.Set(1);
+  }
+  else if (intakeMotorSpeed > 0) {
+    intakeMoter.Set(intakeMotorSpeed);
+  }
   // Outtake
   if (outTakeMotorSpeed > 0) {
     upTopOutTakeMotor.Set(outTakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
-    bottomTopOutTakeMotor.Set(outTakeMotorSpeed * -1);
+    bottomTopOutTakeMotor.Set(outTakeMotorSpeed);
   }
   // Eject status
   if (ejectStatus == true) {
     upTopOutTakeMotor.Set(-0.2);
-    bottomTopOutTakeMotor.Set(0.2);
+    bottomTopOutTakeMotor.Set(-0.2);
     midOutTakeMotor.Set(-0.2);
   } 
 }
@@ -124,7 +131,7 @@ void Robot::TeleopPeriodic() {
   double rJoyStick = manipulatorController.GetRightY() * -1;
   double lJoyStick = manipulatorController.GetLeftY() * -1;
 
-  launcher(rTrigger, lBumper);
+  launcher(rTrigger, lTrigger, lBumper);
   lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
