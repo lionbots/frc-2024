@@ -6,6 +6,30 @@
 
 #include <fmt/core.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/XboxController.h>
+#include <rev/CANSparkMax.h>
+#include <rev/CANSparkMaxLowLevel.h>
+#include <rev/SparkMaxAbsoluteEncoder.h>
+#include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
+#include <frc/drive/DifferentialDrive.h>
+#include <frc/motorcontrol/MotorControllerGroup.h>
+#include <ctre/Phoenix.h>
+#include <rev/CANSparkMax.h>
+#include <rev/CANSparkMaxLowLevel.h>
+
+//Motor controller for Drive system
+rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+frc::MotorControllerGroup lMotorGroup(flMotor,blMotor);
+frc::MotorControllerGroup rMotorGroup(frMotor,brMotor);
+
+//Differentialdrive Object
+frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
+
+//XBox Controller
+frc::XboxController driveController(5);
 
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
@@ -57,7 +81,37 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {}
 
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() {
+  //Drive controller
+  double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
+  double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
+  double driveControllerRightJoyStickX = driveController.GetRightX();
+
+  // Forward and turning
+  if (driveControllerRightTrigger > 0 && (driveControllerRightJoyStickX > 0.05 || driveControllerRightJoyStickX < -0.05))
+  {
+    d_drive.ArcadeDrive(driveControllerRightJoyStickX, driveControllerRightTrigger * -1, true);
+    // Backward and turning
+  }
+  else if (driveControllerLeftTrigger > 0 && (driveControllerRightJoyStickX > 0.05 || driveControllerRightJoyStickX < -0.05))
+  {
+    d_drive.ArcadeDrive(driveControllerRightJoyStickX, driveControllerLeftTrigger, true);
+    // Forward
+  } else if (driveControllerRightTrigger > 0)
+  {
+    d_drive.ArcadeDrive(0, driveControllerRightTrigger  * -1, true);
+    // Backward
+  }
+  else if (driveControllerLeftTrigger > 0)
+  {
+    d_drive.ArcadeDrive(0, driveControllerLeftTrigger, true);
+    // Stop
+  }
+  else
+  {
+    d_drive.ArcadeDrive(0, 0, true);
+  }
+}
 
 void Robot::DisabledInit() {}
 
