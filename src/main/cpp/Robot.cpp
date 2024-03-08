@@ -91,6 +91,32 @@ void lifter(double rSideSpeed, double lSideSpeed) {
   }
 }
 
+void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
+  if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
+  {
+    d_drive.ArcadeDrive(dir, forwardSpd * -1, true);
+    // Backward and turning
+  }
+  else if (dir > 0 && (dir > 0.05 || dir < -0.05))
+  {
+    d_drive.ArcadeDrive(dir, backwardSpd, true);
+    // Forward
+  } else if (forwardSpd > 0)
+  {
+    d_drive.ArcadeDrive(0, forwardSpd  * -1, true);
+    // Backward
+  }
+  else if (backwardSpd > 0)
+  {
+    d_drive.ArcadeDrive(0, backwardSpd, true);
+    // Stop
+  }
+  else
+  {
+    d_drive.ArcadeDrive(0, 0, true);
+  }
+}
+
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -145,33 +171,8 @@ void Robot::TeleopPeriodic() {
   //Drive controller
   double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
   double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
-  double driveControllerRightJoyStickX = driveController.GetRightX();
+  double driveControllerLeftJoyStickX = driveController.GetLeftX();
 
-  // Forward and turning
-  if (driveControllerRightTrigger > 0 && (driveControllerRightJoyStickX > 0.05 || driveControllerRightJoyStickX < -0.05))
-  {
-    d_drive.ArcadeDrive(driveControllerRightJoyStickX, driveControllerRightTrigger * -1, true);
-    // Backward and turning
-  }
-  else if (driveControllerLeftTrigger > 0 && (driveControllerRightJoyStickX > 0.05 || driveControllerRightJoyStickX < -0.05))
-  {
-    d_drive.ArcadeDrive(driveControllerRightJoyStickX, driveControllerLeftTrigger, true);
-    // Forward
-  } else if (driveControllerRightTrigger > 0)
-  {
-    d_drive.ArcadeDrive(0, driveControllerRightTrigger  * -1, true);
-    // Backward
-  }
-  else if (driveControllerLeftTrigger > 0)
-  {
-    d_drive.ArcadeDrive(0, driveControllerLeftTrigger, true);
-    // Stop
-  }
-  else
-  {
-    d_drive.ArcadeDrive(0, 0, true);
-  }
-}
   double rTrigger = manipulatorController.GetRightTriggerAxis();
   double lTrigger = manipulatorController.GetLeftTriggerAxis();
 
@@ -180,6 +181,7 @@ void Robot::TeleopPeriodic() {
   double rJoyStick = manipulatorController.GetRightY() * -1;
   double lJoyStick = manipulatorController.GetLeftY() * -1;
 
+  backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
   launcher(rTrigger, lTrigger, lBumper);
   lifter(rJoyStick, lJoyStick);
 }
