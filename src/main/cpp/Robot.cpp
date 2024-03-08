@@ -148,8 +148,8 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
 }
 
 void Robot::RobotInit() {
-  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+  m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
+  m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 }
 
@@ -180,18 +180,18 @@ void Robot::AutonomousInit() {
   //     kAutoNameDefault);
   fmt::print("Auto selected: {}\n", m_autoSelected);
 
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
+  if (m_autoSelected == kAutoCustomSpeakerLeave) {
+    autoSpeakerLeave();
   } else {
-    // Default Auto goes here
+    autoLeave();
   }
 }
 
 void Robot::AutonomousPeriodic() {
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
+  if (m_autoSelected == kAutoCustomSpeakerLeave) {
+    autoSpeakerLeave();
   } else {
-    // Default Auto goes here
+    autoLeave();
   }
 }
 
