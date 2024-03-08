@@ -48,10 +48,29 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 //XBox Controller
 frc::XboxController manipulatorController(0);
 
+// function for running top launcher
+void setTopLauncher(double launcherSpeed) {
+  upTopOutTakeMotor.Set(launcherSpeed);
+  bottomTopOutTakeMotor.Set(launcherSpeed);
+}
+
 // auto for getting leave points.
 void autoLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
     d_drive.ArcadeDrive(0, 0.5, true);
+  } else {
+    d_drive.ArcadeDrive(0, 0.0, true);
+  }
+}
+
+void autoSpeakerLeave() {
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime) {
+    setTopLauncher(1);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+    setTopLauncher(1);
+    midOutTakeMotor.Set(0.2);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10000) + autoStartTime) {
+    d_drive.ArcadeDrive(0, -0.5, true);
   } else {
     d_drive.ArcadeDrive(0, 0.0, true);
   }
@@ -68,14 +87,12 @@ void launcher(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatu
   }
   // Outtake
   if (outTakeMotorSpeed > 0) {
-    upTopOutTakeMotor.Set(outTakeMotorSpeed);
+    setTopLauncher(outTakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
-    bottomTopOutTakeMotor.Set(outTakeMotorSpeed);
   }
   // Eject status
   if (ejectStatus == true) {
-    upTopOutTakeMotor.Set(-0.2);
-    bottomTopOutTakeMotor.Set(-0.2);
+    setTopLauncher(-0.2);
     midOutTakeMotor.Set(-0.2);
   } 
 }
