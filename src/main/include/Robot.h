@@ -8,6 +8,9 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
+#include <thread>
+#include <cscore_oo.h>
+#include <cameraserver/CameraServer.h>
 
 class Robot : public frc::TimedRobot {
  public:
