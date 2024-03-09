@@ -157,7 +157,7 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
     d_drive.ArcadeDrive(dir, forwardSpd * -1, true);
     // Backward and turning
   }
-  else if (dir > 0 && (dir > 0.05 || dir < -0.05))
+  else if (backwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
     d_drive.ArcadeDrive(dir, backwardSpd, true);
     // Forward
