@@ -68,7 +68,7 @@ void autoLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
     d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
   } else {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.0}).value(), true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -83,7 +83,7 @@ void autoSpeakerLeave() {
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   } else {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.0}).value(), true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -176,7 +176,7 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
   }
   else
   {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.0}).value(), true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
