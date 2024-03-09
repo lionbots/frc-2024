@@ -74,7 +74,7 @@ void autoSpeakerLeave() {
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10000) + autoStartTime) {
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime) {
     d_drive.ArcadeDrive(0, -0.5, true);
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
@@ -161,8 +161,7 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
   {
     d_drive.ArcadeDrive(dir, backwardSpd, true);
     // Forward
-  } else if (forwardSpd > 0)
-  {
+  } else if (forwardSpd > 0) {
     d_drive.ArcadeDrive(0, forwardSpd  * -1, true);
     // Backward
   }
@@ -181,6 +180,7 @@ void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
   m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+  std::jthread visionThread(VisionThread);
 }
 
 /**
