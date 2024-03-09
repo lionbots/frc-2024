@@ -208,6 +208,7 @@ void Robot::AutonomousInit() {
   m_autoSelected = m_chooser.GetSelected();
   // m_autoSelected = SmartDashboard::GetString("Auto Selector",
   //     kAutoNameDefault);
+  autoStartTime = std::chrono::high_resolution_clock::now();
   fmt::print("Auto selected: {}\n", m_autoSelected);
 
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
