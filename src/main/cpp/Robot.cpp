@@ -84,7 +84,8 @@ void autoSpeakerLeave() {
 }
 
 //intake and outtake function
-void launcherSpeaker(double outTakeMotorSpeed, double intakeMotorSpeed, bool ejectStatus) {
+void intake(double intakeMotorSpeed) {
+  intakeMotorSpeed *= 2;
   // Intake
   if (intakeMotorSpeed > 1) {
     intakeMotor.Set(1);
@@ -96,6 +97,10 @@ void launcherSpeaker(double outTakeMotorSpeed, double intakeMotorSpeed, bool eje
   } else {
     intakeMotor.Set(0);
   }
+}
+
+//intake and outtake function
+void outake(double outTakeMotorSpeed) {
   // Outtake
   if (outTakeMotorSpeed > 0) {
     setTopLauncher(outTakeMotorSpeed, false);
@@ -104,7 +109,10 @@ void launcherSpeaker(double outTakeMotorSpeed, double intakeMotorSpeed, bool eje
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   }
-  // Eject status
+}
+
+void eject(bool ejectStatus) {
+   // Eject status
   if (ejectStatus) {
     setTopLauncher(-0.2, false);
     midOutTakeMotor.Set(-0.2);
@@ -236,7 +244,9 @@ void Robot::TeleopPeriodic() {
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  launcherSpeaker(rTrigger, lTrigger, lBumper);
+  intake(rTrigger);
+  outake(lTrigger);
+  eject(lBumper);
   launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
 }
