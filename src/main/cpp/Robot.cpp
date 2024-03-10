@@ -66,7 +66,7 @@ void setTopLauncher(double launcherSpeed, bool sameDir) {
 // auto for getting leave points.
 void autoLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{-0.5}).value(), true);
   } else {
     d_drive.ArcadeDrive(0, 0, true);
   }
@@ -79,7 +79,7 @@ void autoSpeakerLeave() {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime) {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{-0.5}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   } else {
@@ -239,7 +239,7 @@ void Robot::AutonomousInit() {
 void Robot::AutonomousPeriodic() {
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
     autoSpeakerLeave();
-  } if (m_autoSelected == kAutoCustomSpeaker) {
+  } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
   } else {
     autoLeave();
