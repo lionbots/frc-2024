@@ -17,6 +17,7 @@
 #include <rev/CANSparkMax.h>
 #include <rev/CANSparkMaxLowLevel.h>
 #include <chrono>
+#include <frc/filter/SlewRateLimiter.h>
 
 // Used for auto (time based)
 auto autoStartTime = std::chrono::high_resolution_clock::now();
@@ -48,6 +49,9 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
 //XBox Controller
 frc::XboxController manipulatorController(0);
 
+// Slew rate limiter
+frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
+
 // function for running top launcher
 void setTopLauncher(double launcherSpeed, bool sameDir) {
   if (!sameDir) {
@@ -62,9 +66,9 @@ void setTopLauncher(double launcherSpeed, bool sameDir) {
 // auto for getting leave points.
 void autoLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
-    d_drive.ArcadeDrive(0, 0.5, true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
   } else {
-    d_drive.ArcadeDrive(0, 0.0, true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -75,11 +79,11 @@ void autoSpeakerLeave() {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime) {
-    d_drive.ArcadeDrive(0, -0.5, true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{-0.5}).value(), true);
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   } else {
-    d_drive.ArcadeDrive(0, 0.0, true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -154,20 +158,20 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
     // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, forwardSpd * -1, true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
     // Backward and turning
   }
   else if (backwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, backwardSpd, true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
     // Forward
   } else if (forwardSpd > 0) {
-    d_drive.ArcadeDrive(0, forwardSpd  * -1, true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
     // Backward
   }
   else if (backwardSpd > 0)
   {
-    d_drive.ArcadeDrive(0, backwardSpd, true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
     // Stop
   }
   else
@@ -208,6 +212,7 @@ void Robot::AutonomousInit() {
   m_autoSelected = m_chooser.GetSelected();
   // m_autoSelected = SmartDashboard::GetString("Auto Selector",
   //     kAutoNameDefault);
+  autoStartTime = std::chrono::high_resolution_clock::now();
   fmt::print("Auto selected: {}\n", m_autoSelected);
 
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
@@ -244,8 +249,8 @@ void Robot::TeleopPeriodic() {
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  intake(rTrigger);
-  outake(lTrigger);
+  intake(lTrigger);
+  outake(rTrigger);
   eject(lBumper);
   launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
