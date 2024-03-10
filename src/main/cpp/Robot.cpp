@@ -219,8 +219,8 @@ void Robot::TeleopPeriodic() {
 
   assistedAimSpeaker(launcherCam, CAMERA_HEIGHT, TARGET_HEIGHT, CAMERA_PITCH, GOAL_RANGE_METERS, driveController, forwardController, turnController, m_drive);
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  intake(rTrigger);
-  outake(lTrigger);
+  intake(lTrigger);
+  outake(rTrigger);
   eject(lBumper);
   launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
