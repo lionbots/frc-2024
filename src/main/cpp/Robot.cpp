@@ -234,8 +234,8 @@ void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
   //Drive controller
-  /* Forwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
-  /* Backwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
+  /* Backwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
+  /* Forwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
   /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
 
   //Manipulator controller
