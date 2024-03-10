@@ -17,9 +17,40 @@
 #include <rev/CANSparkMax.h>
 #include <rev/CANSparkMaxLowLevel.h>
 #include <chrono>
+#include <frc/filter/SlewRateLimiter.h>
 
 // Used for auto (time based)
 auto autoStartTime = std::chrono::high_resolution_clock::now();
+
+//Motor controller for Drive system
+rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+frc::MotorControllerGroup lMotorGroup(flMotor,blMotor);
+frc::MotorControllerGroup rMotorGroup(frMotor,brMotor);
+
+//Differentialdrive Object
+frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
+
+//XBox Controller
+frc::XboxController driveController(5);
+
+//Motor Controller For Intake
+rev::CANSparkMax intakeMotor(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+
+//Motors Controller For Lifter
+ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{1};
+ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{1};
+
+//XBox Controller
+frc::XboxController manipulatorController(0);
+
+// Slew rate limiter
+frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
 
 // function for running top launcher
 void setTopLauncher(double launcherSpeed, bool sameDir) {
@@ -35,9 +66,9 @@ void setTopLauncher(double launcherSpeed, bool sameDir) {
 // auto for getting leave points.
 void autoLeave() {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
-    m_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{0.5}).value(), true);
   } else {
-    m_drive.ArcadeDrive(0, 0, true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -48,11 +79,11 @@ void autoSpeakerLeave() {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
   } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime) {
-    m_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{-0.5}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{-0.5}).value(), true);
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   } else {
-    m_drive.ArcadeDrive(0, 0, true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -139,25 +170,25 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
     // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    m_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
     // Backward and turning
   }
   else if (backwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    m_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
     // Forward
   } else if (forwardSpd > 0) {
-    m_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
     // Backward
   }
   else if (backwardSpd > 0)
   {
-    m_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
     // Stop
   }
   else
   {
-    m_drive.ArcadeDrive(0, 0, true);
+    d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
@@ -233,10 +264,9 @@ void Robot::TeleopPeriodic() {
   /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY() * -1;
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
-  assistedAimSpeaker(launcherCam, CAMERA_HEIGHT, TARGET_HEIGHT, CAMERA_PITCH, GOAL_RANGE_METERS, driveController, forwardController, turnController, m_drive);
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  intake(lTrigger);
-  outake(rTrigger);
+  intake(rTrigger);
+  outake(lTrigger);
   eject(lBumper);
   launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
