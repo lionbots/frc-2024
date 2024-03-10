@@ -170,25 +170,25 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
     // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), false);
     // Backward and turning
   }
   else if (backwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
+    d_drive.ArcadeDrive(dir, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), false);
     // Forward
   } else if (forwardSpd > 0) {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value(), false);
     // Backward
   }
   else if (backwardSpd > 0)
   {
-    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), true);
+    d_drive.ArcadeDrive(0, filter.Calculate(units::voltage::volt_t{backwardSpd}).value(), false);
     // Stop
   }
   else
   {
-    d_drive.ArcadeDrive(0, 0, true);
+    d_drive.ArcadeDrive(0, 0, false);
   }
 }
 
@@ -229,7 +229,7 @@ void Robot::AutonomousInit() {
 
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
     autoSpeakerLeave();
-  } if (m_autoSelected == kAutoCustomSpeaker) {
+  } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
   } else {
     autoLeave();
