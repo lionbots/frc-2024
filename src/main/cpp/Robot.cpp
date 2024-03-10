@@ -87,6 +87,18 @@ void autoSpeakerLeave() {
   }
 }
 
+void autoSpeaker() {
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime) {
+    setTopLauncher(1, false);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+    setTopLauncher(1, false);
+    midOutTakeMotor.Set(0.2);
+  } else {
+    setTopLauncher(0, false);
+    midOutTakeMotor.Set(0);
+  }
+}
+
 //intake and outtake function
 void intake(double intakeMotorSpeed) {
   intakeMotorSpeed *= 2;
@@ -217,6 +229,8 @@ void Robot::AutonomousInit() {
 
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
     autoSpeakerLeave();
+  } if (m_autoSelected == kAutoCustomSpeaker) {
+    autoSpeaker();
   } else {
     autoLeave();
   }
@@ -225,6 +239,8 @@ void Robot::AutonomousInit() {
 void Robot::AutonomousPeriodic() {
   if (m_autoSelected == kAutoCustomSpeakerLeave) {
     autoSpeakerLeave();
+  } if (m_autoSelected == kAutoCustomSpeaker) {
+    autoSpeaker();
   } else {
     autoLeave();
   }
