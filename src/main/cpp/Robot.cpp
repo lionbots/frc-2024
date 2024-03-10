@@ -217,7 +217,7 @@ void Robot::TeleopPeriodic() {
   /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY() * -1;
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
-
+  assistedAimSpeaker(launcherCam, CAMERA_HEIGHT, TARGET_HEIGHT, CAMERA_PITCH, GOAL_RANGE_METERS, driveController, forwardController, turnController, m_drive);
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
   intake(rTrigger);
   outake(lTrigger);
