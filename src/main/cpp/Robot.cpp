@@ -249,8 +249,8 @@ void Robot::TeleopPeriodic() {
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY() * -1;
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
-  intake(rTrigger);
-  outake(lTrigger);
+  intake(lTrigger);
+  outake(rTrigger);
   eject(lBumper);
   launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
