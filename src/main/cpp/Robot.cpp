@@ -37,7 +37,7 @@ frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 frc::XboxController driveController(5);
 
 //Motor Controller For Intake
-rev::CANSparkMax intakeMotor(8, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor {8};
 rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
@@ -103,15 +103,15 @@ void autoSpeaker() {
 void intake(double intakeMotorSpeed) {
   intakeMotorSpeed *= 2;
   // Intake
-  if (intakeMotorSpeed > 1) {
-    intakeMotor.Set(1);
+  if (intakeMotorSpeed > 0.5) {
+    intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
     midOutTakeMotor.Set(0.2);
   }
   else if (intakeMotorSpeed > 0) {
-    intakeMotor.Set(intakeMotorSpeed);
+    intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, intakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
   } else {
-    intakeMotor.Set(0);
+    intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
 }
 
@@ -132,7 +132,7 @@ void eject(bool ejectStatus) {
   if (ejectStatus) {
     setTopLauncher(-0.2, false);
     midOutTakeMotor.Set(-0.2);
-    intakeMotor.Set(-0.2);
+    intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -0.2);
   }
 }
 
