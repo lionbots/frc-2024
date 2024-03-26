@@ -103,7 +103,7 @@ void autoSpeaker() {
 void intake(double intakeMotorSpeed) {
   intakeMotorSpeed *= 2;
   // Intake
-  if (intakeMotorSpeed > 0.5) {
+  if (intakeMotorSpeed > 1) {
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
     midOutTakeMotor.Set(0.2);
   }
