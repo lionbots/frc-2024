@@ -33,6 +33,7 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoCustomSpeaker = "Speaker";
   const std::string kAutoCustomSpeakerLeave = "Speaker + Leave";
   std::string m_autoSelected;
+  /*
   static void VisionThread()
   {
     cs::UsbCamera cameraF{"FrontCamera", 0};
@@ -45,6 +46,7 @@ class Robot : public frc::TimedRobot {
     cameraB = frc::CameraServer::StartAutomaticCapture(1);
     cs::CvSink cvSink = frc::CameraServer::GetVideo();
     cs::CvSource outputStream = frc::CameraServer::PutVideo("Rectangle", 800, 700);
-  }
+  } 
+  */
 
 };

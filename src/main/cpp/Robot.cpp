@@ -192,7 +192,7 @@ void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
   m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-  std::jthread visionThread(VisionThread);
+  // std::jthread visionThread(VisionThread);
 
   //Limit for drive train motors
   frMotor.SetSmartCurrentLimit(40);
