@@ -145,21 +145,15 @@ void launcherAmp(bool enable) {
 //lifter function
 void lifter(double rSideSpeed, double lSideSpeed) {
   // Right Lifter
-  if (rSideSpeed > 0.05) {
+  if (rSideSpeed > 0.05 || rSideSpeed < -0.05) {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
-  }
-  else if (rSideSpeed < -0.05) {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed * -1);
   }
   else {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
   // Left Lifter
-  if (lSideSpeed > 0.05) {
+  if (lSideSpeed > 0.05 || lSideSpeed < -0.05) {
     lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed);
-  }
-  else if (lSideSpeed < -0.05) {
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed * -1);
   }
   else {
     lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
