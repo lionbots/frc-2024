@@ -33,20 +33,14 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoCustomSpeaker = "Speaker";
   const std::string kAutoCustomSpeakerLeave = "Speaker + Leave";
   std::string m_autoSelected;
-  /*
+
   static void VisionThread()
   {
     cs::UsbCamera cameraF{"FrontCamera", 0};
-    cs::UsbCamera cameraB{"BackCamera", 1};
     cameraF.SetResolution(320, 240);
-    cameraB.SetResolution(160, 120);
     cameraF.SetFPS(30);
-    cameraB.SetFPS(20);
     cameraF = frc::CameraServer::StartAutomaticCapture(0);
-    cameraB = frc::CameraServer::StartAutomaticCapture(1);
     cs::CvSink cvSink = frc::CameraServer::GetVideo();
     cs::CvSource outputStream = frc::CameraServer::PutVideo("Rectangle", 800, 700);
-  } 
-  */
-
+  }
 };
