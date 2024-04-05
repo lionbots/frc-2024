@@ -145,6 +145,8 @@ void launcherAmp(bool enable) {
 //lifter function
 void lifter(double rSideSpeed, double lSideSpeed) {
   // Right Lifter
+  rSideSpeed *= -1;
+  lSideSpeed *= -1;
   if (rSideSpeed > 0.05 || rSideSpeed < -0.05) {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
   }
