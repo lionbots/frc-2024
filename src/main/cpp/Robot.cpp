@@ -136,11 +136,11 @@ void eject(bool ejectStatus) {
   }
 }
 
-void launcherAmp(bool enable) {
+/*void launcherAmp(bool enable) {
   if (enable) {
     setTopLauncher(-0.2, 0.2);
   }
-}
+}*/
 
 //lifter function
 void lifter(double rSideSpeed, double lSideSpeed) {
@@ -272,7 +272,7 @@ void Robot::TeleopPeriodic() {
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
-  launcherAmp(rBumper);
+  //launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
