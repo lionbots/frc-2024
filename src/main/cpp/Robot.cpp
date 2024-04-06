@@ -34,9 +34,6 @@ frc::MotorControllerGroup rMotorGroup(frMotor,brMotor);
 //Differentialdrive Object
 frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 
-//XBox Controller
-frc::XboxController driveController(5);
-
 //Motor Controller For Intake
 ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor {8};
 rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
@@ -47,13 +44,12 @@ rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushl
 ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{9};
 ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 
-//XBox Controller
-frc::XboxController manipulatorController(0);
+//XBox Controllers
+frc::XboxController xboxDriveController(5);
+frc::XboxController xboxManipulatorController(0);
 
-//PS4 Controller
+//PS4 Controllers
 frc::PS4Controller ps4DriveController(4);
-
-//PS4 Manipulator
 frc::PS4Controller ps4ManipulatorController(1);
 
 // Slew rate limiter
@@ -264,9 +260,9 @@ void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
   // Xbox Drive controller
-  /* Backwards Throttle - Left Trigger */ double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
-  /* Forwards Throttle - Right Trigger */ double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
-  /* Turning - Left Joystick*/ double driveControllerLeftJoyStickX = driveController.GetLeftX();
+  /* Backwards Throttle - Left Trigger */ double xboxDriveLeftTrigger = xboxDriveController.GetLeftTriggerAxis();
+  /* Forwards Throttle - Right Trigger */ double xboxDriveRightTrigger = xboxDriveController.GetRightTriggerAxis();
+  /* Turning - Left Joystick*/ double xboxDriveLeftJoyStickX = xboxDriveController.GetLeftX();
 
   // PS4 Drive controller
   /* Backwards Throttle - Left Trigger */ double drivePs4RightTrigger = ps4DriveController.GetL2Button(); 
@@ -274,27 +270,27 @@ void Robot::TeleopPeriodic() {
   /* Turning - Left Joystick*/ double drivePs4LeftJoyStickX = ps4DriveController.GetLeftX();
   
   // Xbox Manipulator controller
-  /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
-  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
-  /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
+  /* Speaker Outtake - Right Trigger*/ double rTrigger = xboxManipulatorController.GetRightTriggerAxis();
+  /* Amplifier Outtake - Left Bumper*/ bool rBumper = xboxManipulatorController.GetRightBumper();
+  /* Intake  - Left Trigger*/ double lTrigger = xboxManipulatorController.GetLeftTriggerAxis();
 
   // PS4 Manipulator
   /* Speaker Outtake - Right Trigger*/ double ps4RTrigger = ps4ManipulatorController.GetR2Button();
   /* Amplifier Outtake - Left Bumper*/ bool ps4RBumper = ps4ManipulatorController.GetR1Button();
   /* Intake  - Left Trigger*/ double ps4LTrigger = ps4ManipulatorController.GetL2Button();
 
-  /* Xbox Eject - Left Bumper*/ bool lBumper = manipulatorController.GetLeftBumper();
+  /* Xbox Eject - Left Bumper*/ bool lBumper = xboxManipulatorController.GetLeftBumper();
 
   /* PS4 Eject - Left Bumper*/ bool ps4LBumper = ps4ManipulatorController.GetL1Button();
   
-  /* Xbox Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
-  /* Xbox Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
+  /* Xbox Right Lifter - Right Joystick*/ double rJoyStick = xboxManipulatorController.GetRightY();
+  /* Xbox Left Lifter - Left Joystick*/ double lJoyStick = xboxManipulatorController.GetLeftY();
 
   /* PS4 Right Lifter - Right Joystick*/ double ps4RJoystick = ps4ManipulatorController.GetRightY();
   /* PS4 Left Lifter - Left Joystick*/ double ps4LJoystick = ps4ManipulatorController.GetLeftY();
 
   // Xbox Controller
-  backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
+  backupDriveSystem(xboxDriveRightTrigger, xboxDriveLeftTrigger, xboxDriveLeftJoyStickX);
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
