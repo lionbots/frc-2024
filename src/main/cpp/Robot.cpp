@@ -147,8 +147,6 @@ void eject(bool ejectStatus) {
 //lifter function
 void lifter(double rSideSpeed, double lSideSpeed) {
   // Right Lifter
-  rSideSpeed *= -1;
-  lSideSpeed *= -1;
   if (rSideSpeed > 0.05 || rSideSpeed < -0.05) {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
   }
@@ -170,20 +168,24 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
   // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, /*filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value() */ forwardSpd * -1, false);
+    d_drive.ArcadeDrive(dir, forwardSpd * -1, false);
     // Backward and turning
   }
   else if (backwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
-    d_drive.ArcadeDrive(dir, /*filter.Calculate(units::voltage::volt_t{backwardSpd}).value() */ backwardSpd, false);
+    d_drive.ArcadeDrive(dir, backwardSpd, false);
     // Forward
   } else if (forwardSpd > 0) {
-    d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{forwardSpd * -1}).value() */ forwardSpd * -1, false);
+    d_drive.ArcadeDrive(0, forwardSpd * -1, false);
     // Backward
   }
   else if (backwardSpd > 0)
   {
-    d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{backwardSpd}).value() */ backwardSpd, false);
+    d_drive.ArcadeDrive(0, backwardSpd, false);
+  }
+  else if (dir > 0.05 || dir < -0.05)
+  {
+    d_drive.ArcadeDrive(dir, 0, false);
     // Stop
   }
   else
