@@ -293,12 +293,21 @@ void Robot::TeleopPeriodic() {
   /* PS4 Right Lifter - Right Joystick*/ double ps4RJoystick = ps4ManipulatorController.GetRightY();
   /* PS4 Left Lifter - Left Joystick*/ double ps4LJoystick = ps4ManipulatorController.GetLeftY();
 
+  // Xbox Controller
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
   //launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
+
+  // PS4 Controller
+  backupDriveSystem(drivePs4RightTrigger, drivePs4LeftTrigger, drivePs4LeftJoyStickX);
+  intake(ps4LTrigger);
+  outake(ps4RTrigger);
+  eject(ps4LBumper);
+  //launcherAmp(ps4RBumper);
+  lifter(ps4RJoystick, ps4LJoystick);
 }
 void Robot::DisabledInit() {}
 
