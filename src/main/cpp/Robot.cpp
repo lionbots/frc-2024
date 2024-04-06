@@ -18,6 +18,7 @@
 #include <rev/CANSparkMaxLowLevel.h>
 #include <chrono>
 #include <frc/filter/SlewRateLimiter.h>
+#include <frc/PS4Controller.h>
 
 // Used for auto (time based)
 auto autoStartTime = std::chrono::high_resolution_clock::now();
@@ -48,6 +49,12 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 
 //XBox Controller
 frc::XboxController manipulatorController(0);
+
+//PS4 Controller
+frc::PS4Controller ps4DriveController(4);
+
+//PS4 Manipulator
+frc::PS4Controller ps4ManipulatorController(1);
 
 // Slew rate limiter
 // frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
@@ -256,20 +263,35 @@ void Robot::AutonomousPeriodic() {
 void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
-  //Drive controller
-  /* Backwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
-  /* Forwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
-  /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
+  // Xbox Drive controller
+  /* Backwards Throttle - Left Trigger */ double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
+  /* Forwards Throttle - Right Trigger */ double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
+  /* Turning - Left Joystick*/ double driveControllerLeftJoyStickX = driveController.GetLeftX();
 
-  //Manipulator controller
-  /* Speaker Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
-  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
-  /* Intake  - Left Trigger*/double lTrigger = manipulatorController.GetLeftTriggerAxis();
-
-  /* Eject - Left Bumber*/bool lBumper = manipulatorController.GetLeftBumper();
+  // PS4 Drive controller
+  /* Backwards Throttle - Left Trigger */ double drivePs4RightTrigger = ps4DriveController.GetL2Button(); 
+  /* Forwards Throttle - Right Trigger */ double drivePs4LeftTrigger = ps4DriveController.GetR2Button();
+  /* Turning - Left Joystick*/ double drivePs4LeftJoyStickX = ps4DriveController.GetLeftX();
   
-  /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY();
-  /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY();
+  // Xbox Manipulator controller
+  /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
+  /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
+
+  // PS4 Manipulator
+  /* Speaker Outtake - Right Trigger*/ double ps4RTrigger = ps4ManipulatorController.GetR2Button();
+  /* Amplifier Outtake - Left Bumper*/ bool ps4RBumper = ps4ManipulatorController.GetR1Button();
+  /* Intake  - Left Trigger*/ double ps4LTrigger = ps4ManipulatorController.GetL2Button();
+
+  /* Xbox Eject - Left Bumper*/ bool lBumper = manipulatorController.GetLeftBumper();
+
+  /* PS4 Eject - Left Bumper*/ bool ps4LBumper = ps4ManipulatorController.GetL1Button();
+  
+  /* Xbox Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
+  /* Xbox Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
+
+  /* PS4 Right Lifter - Right Joystick*/ double ps4RJoystick = ps4ManipulatorController.GetRightY();
+  /* PS4 Left Lifter - Left Joystick*/ double ps4LJoystick = ps4ManipulatorController.GetLeftY();
 
   backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
   intake(lTrigger);
