@@ -184,12 +184,12 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
   else if (backwardSpd > 0)
   {
     d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{backwardSpd}).value() */ backwardSpd, false);
-    // Stop
+    // turn only
   }
   else if (dir > 0.05 || dir < -0.05)
   {
     d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{backwardSpd}).value() */ backwardSpd, false);
-    // Stop
+    // stop
   }
   else
   {
