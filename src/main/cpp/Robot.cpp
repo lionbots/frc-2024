@@ -278,6 +278,9 @@ void Robot::TeleopPeriodic() {
   /* Speaker Outtake - Right Trigger*/ double ps4RTrigger = ps4ManipulatorController.GetR2Button();
   /* Amplifier Outtake - Left Bumper*/ bool ps4RBumper = ps4ManipulatorController.GetR1Button();
   /* Intake  - Left Trigger*/ double ps4LTrigger = ps4ManipulatorController.GetL2Button();
+  // (controller output + 1) /2 will set the inital value to zero using linear transformation
+  ps4LTrigger = (ps4LTrigger + 1) / 2;
+  ps4RTrigger = (ps4RTrigger + 1) / 2;
 
   /* Xbox Eject - Left Bumper*/ bool lBumper = xboxManipulatorController.GetLeftBumper();
 
