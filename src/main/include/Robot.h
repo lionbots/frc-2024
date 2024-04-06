@@ -32,6 +32,7 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoDefaultLeave = "Leave";
   const std::string kAutoCustomSpeaker = "Speaker";
   const std::string kAutoCustomSpeakerLeave = "Speaker + Leave";
+  const std::string kAutoCustomDelayedSpeaker = "Delayed Speaker";
   std::string m_autoSelected;
 
   static void VisionThread()
