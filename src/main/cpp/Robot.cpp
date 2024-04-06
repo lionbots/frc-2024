@@ -101,6 +101,23 @@ void autoSpeaker() {
   }
 }
 
+void autoDelayedSpeaker() {
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7000) + autoStartTime) {
+    d_drive.ArcadeDrive(0, -0.5, false);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7350) + autoStartTime) {
+    setTopLauncher(1, false);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10250) + autoStartTime) { 
+    setTopLauncher(1, false);
+    midOutTakeMotor.Set(0.2);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(10600) + autoStartTime) {
+    d_drive.ArcadeDrive(0, 0.5, false);
+  } else {
+    setTopLauncher(0, false);
+    midOutTakeMotor.Set(0);
+  }
+}
+
+
 //intake and outtake function
 void intake(double intakeMotorSpeed) {
   intakeMotorSpeed *= 2;
@@ -247,6 +264,8 @@ void Robot::AutonomousInit() {
     autoSpeakerLeave();
   } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
+  } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
+
   } else {
     autoLeave();
   }
