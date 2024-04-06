@@ -146,6 +146,9 @@ void eject(bool ejectStatus) {
 
 //lifter function
 void lifter(double rSideSpeed, double lSideSpeed) {
+  //Invert controls
+  lSideSpeed *= -1;
+  rSideSpeed *= -1;
   // Right Lifter
   if (rSideSpeed > 0.05 || rSideSpeed < -0.05) {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
