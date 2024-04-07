@@ -215,6 +215,7 @@ void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
   m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   m_chooser.AddOption(kAutoCustomSpeaker, kAutoCustomSpeaker);
+  m_chooser.AddOption(kAutoCustomDelayedSpeaker, kAutoCustomDelayedSpeaker);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
   std::jthread visionThread(VisionThread);
 
