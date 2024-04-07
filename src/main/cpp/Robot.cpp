@@ -259,7 +259,7 @@ void Robot::AutonomousInit() {
   } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
   } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
-
+    autoDelayedSpeaker();
   } else {
     autoLeave();
   }
