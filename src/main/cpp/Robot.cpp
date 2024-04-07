@@ -101,6 +101,25 @@ void autoSpeaker() {
   }
 }
 
+void autoDelayedSpeaker() {
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7000) + autoStartTime) {
+    d_drive.ArcadeDrive(0, 0, false);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7350) + autoStartTime) {
+    d_drive.ArcadeDrive(0, 0.5, false);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(8350) + autoStartTime) {
+    setTopLauncher(1, false); 
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11350) + autoStartTime) {
+    setTopLauncher(1, false);
+    midOutTakeMotor.Set(0.2);
+  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11700) + autoStartTime) {
+    d_drive.ArcadeDrive(0, -0.5, false);
+  } else {
+    setTopLauncher(0, false);
+    midOutTakeMotor.Set(0);
+  }
+}
+
+
 //intake and outtake function
 void intake(double intakeMotorSpeed) {
   intakeMotorSpeed *= 2;
@@ -205,6 +224,7 @@ void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
   m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   m_chooser.AddOption(kAutoCustomSpeaker, kAutoCustomSpeaker);
+  m_chooser.AddOption(kAutoCustomDelayedSpeaker, kAutoCustomDelayedSpeaker);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
   std::jthread visionThread(VisionThread);
 
@@ -247,6 +267,8 @@ void Robot::AutonomousInit() {
     autoSpeakerLeave();
   } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
+  } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
+    autoDelayedSpeaker();
   } else {
     autoLeave();
   }
@@ -257,6 +279,8 @@ void Robot::AutonomousPeriodic() {
     autoSpeakerLeave();
   } else if (m_autoSelected == kAutoCustomSpeaker) {
     autoSpeaker();
+  } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
+    autoDelayedSpeaker();
   } else {
     autoLeave();
   }
