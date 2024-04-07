@@ -165,9 +165,13 @@ void lifter(double rSideSpeed, double lSideSpeed) {
   }
 }
 
-void backupDriveSystem(double forwardSpd, double backwardSpd, double dir){
+void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool slowDown){
   //Reduce turning sensitivity
   dir *= 0.4;
+  if (slowDown) {
+    forwardSpd *= 0.3;
+    backwardSpd *= 0.3;
+  }
   // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
@@ -265,6 +269,7 @@ void Robot::TeleopPeriodic() {
   /* Backwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
   /* Forwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
   /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
+  /* Slowdown -  Right Bumper */ double driveControllerRightBumper = driveController.GetRightBumper();
 
   //Manipulator controller
   /* Speaker Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
@@ -276,7 +281,7 @@ void Robot::TeleopPeriodic() {
   /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY();
   /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY();
 
-  backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX);
+  backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX, driveControllerRightBumper);
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
