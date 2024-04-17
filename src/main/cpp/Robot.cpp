@@ -18,6 +18,8 @@
 #include <rev/CANSparkMaxLowLevel.h>
 #include <chrono>
 #include <frc/filter/SlewRateLimiter.h>
+#include "networktables/NetworkTableInstance.h"
+#include "networktables/NetworkTableValue.h"
 
 // Used for auto (time based)
 auto autoStartTime = std::chrono::high_resolution_clock::now();
