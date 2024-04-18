@@ -59,7 +59,6 @@ frc::XboxController manipulatorController(0);
 frc::PIDController drivechainPID{0.015, 0.005, 0.005};
 
 double pidOutput;
-bool yButtonFirstPress = false;
 
 // function for running top launcher
 void setTopLauncher(double launcherSpeed, bool sameDir)
@@ -302,7 +301,6 @@ void noteAlignment(int tvValue, double txValue)
   }
 }
 
-
 void Robot::RobotInit()
 {
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
@@ -399,7 +397,7 @@ void Robot::TeleopPeriodic()
   /* Turning - Left Joystick*/ double driveControllerLeftJoyStickX = driveController.GetLeftX();
   /* Slowdown -  Right Bumper */ double driveControllerRightBumper = driveController.GetRightBumper();
   /* Note Alignment - Y Button*/ bool driveControllerYButton = driveController.GetYButton();
-  /* Y button first pressed - Y button*/ bool driveControllerYButtonFirstPress = driveController.GetYButtonReleased();
+  /* Y button first pressed - Y button*/ bool driveControllerYButtonPressed = driveController.GetYButtonPressed();
 
   // Manipulator controller
   /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
@@ -415,17 +413,14 @@ void Robot::TeleopPeriodic()
   int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
   double tx = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tx", 0.0);
 
-  if(driveControllerYButtonFirstPress) {
-    yButtonFirstPress = true;
+  if (driveControllerYButtonPressed)
+  {
+    drivechainPID.Reset();
   }
 
   if (driveControllerYButton)
   {
-    if (yButtonFirstPress) {
-      drivechainPID.Reset();
-      yButtonFirstPress = false;
-    }
-    noteAlignment(tv,tx);
+    noteAlignment(tv, tx);
   }
   else
   {
