@@ -56,7 +56,7 @@ frc::XboxController manipulatorController(0);
 // frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
 
 // PID
-frc::PIDController drivechainPID{0.015, 0.005, 0.005};
+frc::PIDController drivechainPID{0.015, 0.01, 0.005};
 
 double pidOutput;
 
@@ -287,17 +287,12 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
 
 void noteAlignment(int tvValue, double txValue)
 {
+  drivechainPID.SetSetpoint(0);
+  drivechainPID.SetTolerance(2, 2);
+  pidOutput = drivechainPID.Calculate(txValue);
   if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
   {
-    frc::SmartDashboard::PutBoolean("Note Detected", tvValue);
-    if (txValue > 0)
-    {
-      d_drive.ArcadeDrive(pidOutput, 0, true);
-    }
-    else if (txValue < 0)
-    {
-      d_drive.ArcadeDrive(pidOutput * -1, 0, true);
-    }
+    d_drive.ArcadeDrive(pidOutput * -1, 0, true);
   }
 }
 
@@ -310,7 +305,6 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
   std::jthread visionThread(VisionThread);
 
-  drivechainPID.SetSetpoint(0);
   drivechainPID.SetTolerance(2, 2);
 
   // Limit for drive train motors
@@ -401,22 +395,15 @@ void Robot::TeleopPeriodic()
 
   // Manipulator controller
   /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
-  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
   /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
-
   /* Eject - Left Bumber*/ bool lBumper = manipulatorController.GetLeftBumper();
 
   /* Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
   /* Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
 
-  // Values
+  // Limelight Values
   int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
   double tx = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tx", 0.0);
-
-  if (driveControllerYButtonPressed)
-  {
-    drivechainPID.Reset();
-  }
 
   if (driveControllerYButton)
   {
@@ -424,6 +411,7 @@ void Robot::TeleopPeriodic()
   }
   else
   {
+    drivechainPID.Reset();
     backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX, driveControllerRightBumper);
   }
   intake(lTrigger);
