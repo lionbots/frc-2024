@@ -285,14 +285,16 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
   }
 }
 
-void noteAlignment(int tvValue, double txValue)
+void noteAlignment(int tvValue, double txValue, double throttle)
 {
   drivechainPID.SetSetpoint(0);
   drivechainPID.SetTolerance(2, 2);
   pidOutput = drivechainPID.Calculate(txValue);
   if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
   {
-    d_drive.ArcadeDrive(pidOutput * -1, 0, true);
+    d_drive.ArcadeDrive(pidOutput * -1, throttle, true);
+  } else {
+    d_drive.ArcadeDrive(0, throttle, true);
   }
 }
 
@@ -407,7 +409,7 @@ void Robot::TeleopPeriodic()
 
   if (driveControllerYButton)
   {
-    noteAlignment(tv, tx);
+    noteAlignment(tv, tx, driveControllerLeftTrigger);
   }
   else
   {
