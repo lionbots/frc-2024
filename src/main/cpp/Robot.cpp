@@ -18,179 +18,242 @@
 #include <rev/CANSparkMaxLowLevel.h>
 #include <chrono>
 #include <frc/filter/SlewRateLimiter.h>
+#include "networktables/NetworkTableInstance.h"
+#include "networktables/NetworkTableValue.h"
+#include <frc/controller/PIDController.h>
 
 // Used for auto (time based)
 auto autoStartTime = std::chrono::high_resolution_clock::now();
 
-//Motor controller for Drive system
+// Motor controller for Drive system
 rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-frc::MotorControllerGroup lMotorGroup(flMotor,blMotor);
-frc::MotorControllerGroup rMotorGroup(frMotor,brMotor);
 
-//Differentialdrive Object
+// Motor controller groups (deprecated) please use leader and follower convention in a future commit.
+frc::MotorControllerGroup lMotorGroup(flMotor, blMotor);
+frc::MotorControllerGroup rMotorGroup(frMotor, brMotor);
+
+// Differentialdrive Object
 frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 
-//XBox Controller
+// XBox Controller
 frc::XboxController driveController(5);
 
-//Motor Controller For Intake
-ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor {8};
+// Motor Controller For Intake
+ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor{8};
 rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
 rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 
-//Motors Controller For Lifter
+// Motors Controller For Lifter
 ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{9};
 ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 
-//XBox Controller
+// XBox Controller
 frc::XboxController manipulatorController(0);
 
-// Slew rate limiter
-// frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
+// PID
+frc::PIDController drivechainPID{0.015, 0.0175, 0.005};
+
+double pidOutput;
 
 // function for running top launcher
-void setTopLauncher(double launcherSpeed, bool sameDir) {
-  if (!sameDir) {
+// double launcherSpeed - specify percentage of launcher speed.
+// bool sameDir - specify if you would like the launchers to move in the same direction.
+void setTopLauncher(double launcherSpeed, bool sameDir)
+{
+  if (!sameDir)
+  {
     upTopOutTakeMotor.Set(launcherSpeed);
     bottomTopOutTakeMotor.Set(launcherSpeed);
-  } else {
+  }
+  else
+  {
     upTopOutTakeMotor.Set(launcherSpeed * -1);
     bottomTopOutTakeMotor.Set(launcherSpeed);
   }
 }
 
 // auto for getting leave points.
-void autoLeave() {
-  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+void autoLeave()
+{
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{-0.5}).value() */ -0.5, true);
-  } else {
+  }
+  else
+  {
     d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
-void autoSpeakerLeave() {
-  if(std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(350) + autoStartTime) {
+// Auto for shooting into the speaker then leaving.
+void autoSpeakerLeave()
+{
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(350) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, 0.5, true);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1100) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1100) + autoStartTime)
+  {
     setTopLauncher(1, false);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime)
+  {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{0.5}).value() */ 0.5, true);
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
-  } else {
+  }
+  else
+  {
     d_drive.ArcadeDrive(0, 0, true);
   }
 }
 
-void autoSpeaker() {
-  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime) {
+// Auto for shooting into the speaker.
+void autoSpeaker()
+{
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime)
+  {
     setTopLauncher(1, false);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime)
+  {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
-  } else {
+  }
+  else
+  {
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   }
 }
 
-void autoDelayedSpeaker() {
-  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7000) + autoStartTime) {
+// Auto for waiting, then shooting in the the speaker.
+void autoDelayedSpeaker()
+{
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7000) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, 0, false);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7350) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7350) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, 0.5, false);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(8350) + autoStartTime) {
-    setTopLauncher(1, false); 
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11350) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(8350) + autoStartTime)
+  {
+    setTopLauncher(1, false);
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11350) + autoStartTime)
+  {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
-  } else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11700) + autoStartTime) {
+  }
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(11700) + autoStartTime)
+  {
     d_drive.ArcadeDrive(0, -0.5, false);
-  } else {
+  }
+  else
+  {
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   }
 }
 
-
-//intake and outtake function
-void intake(double intakeMotorSpeed) {
+// intake and outtake function
+void intake(double intakeMotorSpeed)
+{
   intakeMotorSpeed *= 2;
   // Intake
-  if (intakeMotorSpeed > 1) {
+  if (intakeMotorSpeed > 1)
+  {
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
     midOutTakeMotor.Set(0.2);
   }
-  else if (intakeMotorSpeed > 0) {
+  else if (intakeMotorSpeed > 0)
+  {
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, intakeMotorSpeed);
     midOutTakeMotor.Set(0.2);
-  } else {
+  }
+  else
+  {
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
 }
 
-//intake and outtake function
-void outake(double outTakeMotorSpeed) {
+// intake and outtake function
+void outake(double outTakeMotorSpeed)
+{
   // Outtake
-  if (outTakeMotorSpeed > 0) {
+  if (outTakeMotorSpeed > 0)
+  {
     setTopLauncher(outTakeMotorSpeed, false);
     midOutTakeMotor.Set(0.2);
-  } else {
+  }
+  else
+  {
     setTopLauncher(0, false);
     midOutTakeMotor.Set(0);
   }
 }
 
-void eject(bool ejectStatus) {
-   // Eject status
-  if (ejectStatus) {
+// Function for ejecting note back into intake.
+void eject(bool ejectStatus)
+{
+  // Eject status
+  if (ejectStatus)
+  {
     setTopLauncher(-0.2, false);
     midOutTakeMotor.Set(-0.2);
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -0.2);
   }
 }
 
-/*void launcherAmp(bool enable) {
-  if (enable) {
-    setTopLauncher(-0.2, 0.2);
-  }
-}*/
-
-//lifter function
-void lifter(double rSideSpeed, double lSideSpeed) {
-  //Invert controls
+// lifter function
+void lifter(double rSideSpeed, double lSideSpeed)
+{
+  // Invert controls
   lSideSpeed *= -1;
   rSideSpeed *= -1;
   // Right Lifter
-  if (rSideSpeed > 0.05 || rSideSpeed < -0.05) {
+  if (rSideSpeed > 0.05 || rSideSpeed < -0.05)
+  {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
   }
-  else {
+  else
+  {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
   // Left Lifter
-  if (lSideSpeed > 0.05 || lSideSpeed < -0.05) {
+  if (lSideSpeed > 0.05 || lSideSpeed < -0.05)
+  {
     lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed);
   }
-  else {
+  else
+  {
     lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
 }
 
-void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool slowDown){
-  //Reduce turning sensitivity
+// Backup drive system to be replaced with field centric driving. Includes regular driving controls.
+void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool slowDown)
+{
+
+  // Reduce turning sensitivity
   dir *= 0.4;
-  if (slowDown) {
+  if (slowDown)
+  {
     forwardSpd *= 0.3;
     backwardSpd *= 0.3;
   }
+
   // Forward and turning
   if (forwardSpd > 0 && (dir > 0.05 || dir < -0.05))
   {
@@ -201,7 +264,9 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
   {
     d_drive.ArcadeDrive(dir, backwardSpd, false);
     // Forward
-  } else if (forwardSpd > 0) {
+  }
+  else if (forwardSpd > 0)
+  {
     d_drive.ArcadeDrive(0, forwardSpd * -1, false);
     // Backward
   }
@@ -220,15 +285,38 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
   }
 }
 
-void Robot::RobotInit() {
+// Function for automatically aligning robot with detected note (target.)
+void noteAlignment(int tvValue, double txValue, double throttle)
+{
+  //Set PID setpoint and tolerance
+  drivechainPID.SetSetpoint(0);
+  drivechainPID.SetTolerance(2, 2);
+  //Calculate PID output
+  pidOutput = drivechainPID.Calculate(txValue);
+  //Check for target and if PID is at setpoint
+  if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
+  {
+    //Rotate with PID output and move forward
+    d_drive.ArcadeDrive(pidOutput * -1, throttle, true);
+  } else {
+    //Move forward
+    d_drive.ArcadeDrive(0, throttle, true);
+  }
+}
+
+void Robot::RobotInit()
+{
   m_chooser.SetDefaultOption(kAutoDefaultLeave, kAutoDefaultLeave);
   m_chooser.AddOption(kAutoCustomSpeakerLeave, kAutoCustomSpeakerLeave);
   m_chooser.AddOption(kAutoCustomSpeaker, kAutoCustomSpeaker);
   m_chooser.AddOption(kAutoCustomDelayedSpeaker, kAutoCustomDelayedSpeaker);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+  // Create thread for usb camera.
   std::jthread visionThread(VisionThread);
 
-  //Limit for drive train motors
+  drivechainPID.SetTolerance(2, 2);
+
+  // Limit for drive train motors
   frMotor.SetSmartCurrentLimit(40);
   brMotor.SetSmartCurrentLimit(40);
   flMotor.SetSmartCurrentLimit(40);
@@ -256,60 +344,88 @@ void Robot::RobotPeriodic() {}
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
-void Robot::AutonomousInit() {
+void Robot::AutonomousInit()
+{
   m_autoSelected = m_chooser.GetSelected();
   // m_autoSelected = SmartDashboard::GetString("Auto Selector",
   //     kAutoNameDefault);
   autoStartTime = std::chrono::high_resolution_clock::now();
   fmt::print("Auto selected: {}\n", m_autoSelected);
 
-  if (m_autoSelected == kAutoCustomSpeakerLeave) {
+  if (m_autoSelected == kAutoCustomSpeakerLeave)
+  {
     autoSpeakerLeave();
-  } else if (m_autoSelected == kAutoCustomSpeaker) {
+  }
+  else if (m_autoSelected == kAutoCustomSpeaker)
+  {
     autoSpeaker();
-  } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
+  }
+  else if (m_autoSelected == kAutoCustomDelayedSpeaker)
+  {
     autoDelayedSpeaker();
-  } else {
+  }
+  else
+  {
     autoLeave();
   }
 }
 
-void Robot::AutonomousPeriodic() {
-  if (m_autoSelected == kAutoCustomSpeakerLeave) {
+void Robot::AutonomousPeriodic()
+{
+  if (m_autoSelected == kAutoCustomSpeakerLeave)
+  {
     autoSpeakerLeave();
-  } else if (m_autoSelected == kAutoCustomSpeaker) {
+  }
+  else if (m_autoSelected == kAutoCustomSpeaker)
+  {
     autoSpeaker();
-  } else if (m_autoSelected == kAutoCustomDelayedSpeaker) {
+  }
+  else if (m_autoSelected == kAutoCustomDelayedSpeaker)
+  {
     autoDelayedSpeaker();
-  } else {
+  }
+  else
+  {
     autoLeave();
   }
 }
 
 void Robot::TeleopInit() {}
 
-void Robot::TeleopPeriodic() {
-  //Drive controller
-  /* Backwards Throttle - Left Trigger */double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
-  /* Forwards Throttle - Right Trigger */double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
-  /* Turning - Left Joystick*/double driveControllerLeftJoyStickX = driveController.GetLeftX();
+void Robot::TeleopPeriodic()
+{
+  // Drive controller
+  /* Backwards Throttle - Left Trigger */ double driveControllerLeftTrigger = driveController.GetLeftTriggerAxis();
+  /* Forwards Throttle - Right Trigger */ double driveControllerRightTrigger = driveController.GetRightTriggerAxis();
+  /* Turning - Left Joystick*/ double driveControllerLeftJoyStickX = driveController.GetLeftX();
   /* Slowdown -  Right Bumper */ double driveControllerRightBumper = driveController.GetRightBumper();
+  /* Note Alignment - Y Button*/ bool driveControllerYButton = driveController.GetYButton();
+  /* Y button first pressed - Y button*/ bool driveControllerYButtonPressed = driveController.GetYButtonPressed();
 
-  //Manipulator controller
-  /* Speaker Outtake - Right Trigger*/double rTrigger = manipulatorController.GetRightTriggerAxis();
-  /* Amplifier Outtake - Left Bumper*/ bool rBumper = manipulatorController.GetRightBumper();
-  /* Intake  - Left Trigger*/double lTrigger = manipulatorController.GetLeftTriggerAxis();
+  // Manipulator controller
+  /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
+  /* Eject - Left Bumber*/ bool lBumper = manipulatorController.GetLeftBumper();
 
-  /* Eject - Left Bumber*/bool lBumper = manipulatorController.GetLeftBumper();
-  
-  /* Right Lifter - Right Joystick*/double rJoyStick = manipulatorController.GetRightY();
-  /* Left Lifter - Left Joystick*/double lJoyStick = manipulatorController.GetLeftY();
+  /* Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
+  /* Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
 
-  backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX, driveControllerRightBumper);
+  // Limelight Values, pulled from published network tables.
+  int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
+  double tx = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tx", 0.0);
+
+  if (driveControllerYButton)
+  {
+    noteAlignment(tv, tx, driveControllerLeftTrigger);
+  }
+  else
+  {
+    drivechainPID.Reset();
+    backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX, driveControllerRightBumper);
+  }
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
-  //launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
@@ -325,7 +441,8 @@ void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 
 #ifndef RUNNING_FRC_TESTS
-int main() {
+int main()
+{
   return frc::StartRobot<Robot>();
 }
 #endif
