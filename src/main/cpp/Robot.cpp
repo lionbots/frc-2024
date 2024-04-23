@@ -30,6 +30,8 @@ rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
 rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+
+// Motor controller groups (deprecated) please use leader and follower convention in a future commit.
 frc::MotorControllerGroup lMotorGroup(flMotor, blMotor);
 frc::MotorControllerGroup rMotorGroup(frMotor, brMotor);
 
@@ -52,15 +54,14 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 // XBox Controller
 frc::XboxController manipulatorController(0);
 
-// Slew rate limiter
-// frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
-
 // PID
 frc::PIDController drivechainPID{0.015, 0.0175, 0.005};
 
 double pidOutput;
 
 // function for running top launcher
+// double launcherSpeed - specify percentage of launcher speed.
+// bool sameDir - specify if you would like the launchers to move in the same direction.
 void setTopLauncher(double launcherSpeed, bool sameDir)
 {
   if (!sameDir)
@@ -88,6 +89,7 @@ void autoLeave()
   }
 }
 
+// Auto for shooting into the speaker then leaving.
 void autoSpeakerLeave()
 {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(350) + autoStartTime)
@@ -115,6 +117,7 @@ void autoSpeakerLeave()
   }
 }
 
+// Auto for shooting into the speaker.
 void autoSpeaker()
 {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1000) + autoStartTime)
@@ -133,6 +136,7 @@ void autoSpeaker()
   }
 }
 
+// Auto for waiting, then shooting in the the speaker.
 void autoDelayedSpeaker()
 {
   if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7000) + autoStartTime)
@@ -200,6 +204,7 @@ void outake(double outTakeMotorSpeed)
   }
 }
 
+// Function for ejecting note back into intake.
 void eject(bool ejectStatus)
 {
   // Eject status
@@ -210,12 +215,6 @@ void eject(bool ejectStatus)
     intakeMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -0.2);
   }
 }
-
-/*void launcherAmp(bool enable) {
-  if (enable) {
-    setTopLauncher(-0.2, 0.2);
-  }
-}*/
 
 // lifter function
 void lifter(double rSideSpeed, double lSideSpeed)
@@ -243,6 +242,7 @@ void lifter(double rSideSpeed, double lSideSpeed)
   }
 }
 
+// Backup drive system to be replaced with field centric driving. Includes regular driving controls.
 void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool slowDown)
 {
 
@@ -285,6 +285,7 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
   }
 }
 
+// Function for automatically aligning robot with detected note (target.)
 void noteAlignment(int tvValue, double txValue, double throttle)
 {
   //Set PID setpoint and tolerance
@@ -310,6 +311,7 @@ void Robot::RobotInit()
   m_chooser.AddOption(kAutoCustomSpeaker, kAutoCustomSpeaker);
   m_chooser.AddOption(kAutoCustomDelayedSpeaker, kAutoCustomDelayedSpeaker);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+  // Create thread for usb camera.
   std::jthread visionThread(VisionThread);
 
   drivechainPID.SetTolerance(2, 2);
@@ -408,7 +410,7 @@ void Robot::TeleopPeriodic()
   /* Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
   /* Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
 
-  // Limelight Values
+  // Limelight Values, pulled from published network tables.
   int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
   double tx = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tx", 0.0);
 
@@ -424,7 +426,6 @@ void Robot::TeleopPeriodic()
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
-  // launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
 }
 void Robot::DisabledInit() {}
