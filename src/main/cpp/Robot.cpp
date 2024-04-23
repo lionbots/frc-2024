@@ -56,7 +56,7 @@ frc::XboxController manipulatorController(0);
 // frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
 
 // PID
-frc::PIDController drivechainPID{0.015, 0.01, 0.005};
+frc::PIDController drivechainPID{0.015, 0.0175, 0.005};
 
 double pidOutput;
 
@@ -287,13 +287,18 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
 
 void noteAlignment(int tvValue, double txValue, double throttle)
 {
+  //Set PID setpoint and tolerance
   drivechainPID.SetSetpoint(0);
   drivechainPID.SetTolerance(2, 2);
+  //Calculate PID output
   pidOutput = drivechainPID.Calculate(txValue);
+  //Check for target and if PID is at setpoint
   if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
   {
+    //Rotate with PID output and move forward
     d_drive.ArcadeDrive(pidOutput * -1, throttle, true);
   } else {
+    //Move forward
     d_drive.ArcadeDrive(0, throttle, true);
   }
 }
