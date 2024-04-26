@@ -13,6 +13,9 @@
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
+#include <frc/kinematics/DifferentialDriveKinematics.h>
+#include <frc/estimator/DifferentialDrivePoseEstimator.h>
+#include <frc/ADIS16470_IMU.h>
 #include <ctre/Phoenix.h>
 #include <rev/CANSparkMax.h>
 #include <rev/CANSparkMaxLowLevel.h>
@@ -33,6 +36,24 @@ frc::MotorControllerGroup rMotorGroup(frMotor,brMotor);
 //Differentialdrive Object
 frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
 
+//Differential drive kinematics
+frc::DifferentialDriveKinematics dDKinematic(units::meter_t(0.5588));
+
+//Encoder for Neo Brushless
+rev::SparkRelativeEncoder lEncoder = frMotor.GetEncoder();
+rev::SparkRelativeEncoder rEncoder = flMotor.GetEncoder();
+
+//Distance traveled by the Encoder
+double lDistance = lEncoder.GetPosition();
+double rDistance = rEncoder.GetPosition();
+
+//Gyroscope
+frc::ADIS16470_IMU gyroscope{};
+units::degree_t angle = gyroscope.GetAngle();
+
+//Pose Estimator
+frc::DifferentialDrivePoseEstimator poseEstimator{dDKinematic, units::degree_t{gyroscope.GetAngle()}, units::meter_t{lDistance}, units::meter_t{rDistance}, frc::Pose2d{}, {0.005804775137422, 0.005804775137422, 0.005804775137422},{0, 0, 0}};
+
 //XBox Controller
 frc::XboxController driveController(5);
 
@@ -51,6 +72,12 @@ frc::XboxController manipulatorController(0);
 
 // Slew rate limiter
 // frc::SlewRateLimiter<units::volts> filter{2_V / 0.5_s};
+
+// function for poseEstimation
+
+void estimatePose() {
+
+}
 
 // function for running top launcher
 void setTopLauncher(double launcherSpeed, bool sameDir) {
