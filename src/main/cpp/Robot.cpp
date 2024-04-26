@@ -336,6 +336,7 @@ void Robot::TeleopPeriodic() {
   eject(lBumper);
   //launcherAmp(rBumper);
   lifter(rJoyStick, lJoyStick);
+  estimatePose();
 }
 void Robot::DisabledInit() {}
 
