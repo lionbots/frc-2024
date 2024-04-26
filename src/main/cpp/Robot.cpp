@@ -293,7 +293,13 @@ void Robot::AutonomousPeriodic() {
   }
 }
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+  //Reset pose estimator and odometry readings
+  gyroscope.Reset();
+  lEncoder.SetPosition(0);
+  rEncoder.SetPosition(0);
+  poseEstimator.ResetPosition(gyroscope.GetAngle(), units::length::meter_t{lEncoder.GetPosition()}, units::length::meter_t{rEncoder.GetPosition()}, frc::Pose2d{});
+}
 
 void Robot::TeleopPeriodic() {
   //Drive controller
