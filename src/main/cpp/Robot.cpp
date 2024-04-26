@@ -8,7 +8,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/XboxController.h>
 #include <rev/CANSparkMax.h>
-#include <rev/CANSparkMaxLowLevel.h>
 #include <rev/SparkMaxAbsoluteEncoder.h>
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
 #include <frc/drive/DifferentialDrive.h>
@@ -26,10 +25,10 @@
 auto autoStartTime = std::chrono::high_resolution_clock::now();
 
 // Motor controller for Drive system
-rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax frMotor{2, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax flMotor{1, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax brMotor{3, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax blMotor{4, rev::CANSparkLowLevel::MotorType::kBrushless};
 
 // Motor controller groups (deprecated) please use leader and follower convention in a future commit.
 frc::MotorControllerGroup lMotorGroup(flMotor, blMotor);
@@ -43,9 +42,9 @@ frc::XboxController driveController(5);
 
 // Motor Controller For Intake
 ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor{8};
-rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkLowLevel::MotorType::kBrushless);
+rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkLowLevel::MotorType::kBrushless);
+rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkLowLevel::MotorType::kBrushless};
 
 // Motors Controller For Lifter
 ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{9};
