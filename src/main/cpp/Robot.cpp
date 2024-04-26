@@ -235,6 +235,10 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
   std::jthread visionThread(VisionThread);
 
+  //Conversion factor for motor rotation to wheel rotation
+  lEncoder.SetPositionConversionFactor(0.0566);
+  rEncoder.SetPositionConversionFactor(0.0566);
+
   //Limit for drive train motors
   frMotor.SetSmartCurrentLimit(40);
   brMotor.SetSmartCurrentLimit(40);
