@@ -8,7 +8,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/XboxController.h>
 #include <rev/CANSparkMax.h>
-#include <rev/CANSparkMaxLowLevel.h>
 #include <rev/SparkMaxAbsoluteEncoder.h>
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
 #include <frc/drive/DifferentialDrive.h>
@@ -26,26 +25,26 @@
 auto autoStartTime = std::chrono::high_resolution_clock::now();
 
 // Motor controller for Drive system
-rev::CANSparkMax frMotor{2, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax flMotor{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax brMotor{3, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-rev::CANSparkMax blMotor{4, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax frMotor{2, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax flMotor{1, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax brMotor{3, rev::CANSparkLowLevel::MotorType::kBrushless};
+rev::CANSparkMax blMotor{4, rev::CANSparkLowLevel::MotorType::kBrushless};
 
 // Motor controller groups (deprecated) please use leader and follower convention in a future commit.
-frc::MotorControllerGroup lMotorGroup(flMotor, blMotor);
-frc::MotorControllerGroup rMotorGroup(frMotor, brMotor);
+// frc::MotorControllerGroup lMotorGroup(flMotor, blMotor);
+// frc::MotorControllerGroup rMotorGroup(frMotor, brMotor);
 
 // Differentialdrive Object
-frc::DifferentialDrive d_drive{lMotorGroup, rMotorGroup};
+frc::DifferentialDrive d_drive{flMotor, frMotor};
 
 // XBox Controller
 frc::XboxController driveController(5);
 
 // Motor Controller For Intake
 ctre::phoenix::motorcontrol::can::TalonSRX intakeMotor{8};
-rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+rev::CANSparkMax upTopOutTakeMotor(7, rev::CANSparkLowLevel::MotorType::kBrushless);
+rev::CANSparkMax bottomTopOutTakeMotor(6, rev::CANSparkLowLevel::MotorType::kBrushless);
+rev::CANSparkMax midOutTakeMotor{5, rev::CANSparkLowLevel::MotorType::kBrushless};
 
 // Motors Controller For Lifter
 ctre::phoenix::motorcontrol::can::TalonSRX rLiftMotor{9};
@@ -288,18 +287,20 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
 // Function for automatically aligning robot with detected note (target.)
 void noteAlignment(int tvValue, double txValue, double throttle)
 {
-  //Set PID setpoint and tolerance
+  // Set PID setpoint and tolerance
   drivechainPID.SetSetpoint(0);
   drivechainPID.SetTolerance(2, 2);
-  //Calculate PID output
+  // Calculate PID output
   pidOutput = drivechainPID.Calculate(txValue);
-  //Check for target and if PID is at setpoint
+  // Check for target and if PID is at setpoint
   if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
   {
-    //Rotate with PID output and move forward
+    // Rotate with PID output and move forward
     d_drive.ArcadeDrive(pidOutput * -1, throttle, true);
-  } else {
-    //Move forward
+  }
+  else
+  {
+    // Move forward
     d_drive.ArcadeDrive(0, throttle, true);
   }
 }
@@ -316,11 +317,19 @@ void Robot::RobotInit()
 
   drivechainPID.SetTolerance(2, 2);
 
+  // reset the configuration parameters
+  frMotor.RestoreFactoryDefaults();
+  flMotor.RestoreFactoryDefaults();
+  brMotor.RestoreFactoryDefaults();
+  blMotor.RestoreFactoryDefaults();
   // Limit for drive train motors
   frMotor.SetSmartCurrentLimit(40);
   brMotor.SetSmartCurrentLimit(40);
   flMotor.SetSmartCurrentLimit(40);
   blMotor.SetSmartCurrentLimit(40);
+
+  brMotor.Follow(frMotor);
+  blMotor.Follow(flMotor);
 }
 
 /**
