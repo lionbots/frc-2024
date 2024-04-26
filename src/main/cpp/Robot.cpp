@@ -76,7 +76,19 @@ frc::XboxController manipulatorController(0);
 // function for poseEstimation
 
 void estimatePose() {
+  //Get gyroscope angle
+  angle = gyroscope.GetAngle();
+  //Get encoder values
+  lDistance = lEncoder.GetPosition() * -1;
+  rDistance = rEncoder.GetPosition();
 
+  //Update pose Estimator
+  poseEstimator.Update(units::degree_t{gyroscope.GetAngle()}, units::meter_t{lDistance}, units::meter_t{rDistance});
+
+  //Print the estimated position of robot
+  frc::SmartDashboard::PutNumber("X Position", poseEstimator.GetEstimatedPosition().X().value());
+  frc::SmartDashboard::PutNumber("Y Position", poseEstimator.GetEstimatedPosition().Y().value());
+  frc::SmartDashboard::PutNumber("Rotation Heading", poseEstimator.GetEstimatedPosition().Rotation().Degrees().value());
 }
 
 // function for running top launcher
