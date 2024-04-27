@@ -58,6 +58,29 @@ frc::PIDController drivechainPID{0.015, 0.0175, 0.005};
 
 double pidOutput;
 
+void motorInit() {
+  // reset the configuration parameters
+  frMotor.RestoreFactoryDefaults();
+  flMotor.RestoreFactoryDefaults();
+  brMotor.RestoreFactoryDefaults();
+  blMotor.RestoreFactoryDefaults();
+  rLiftMotor.ConfigFactoryDefault();
+  lLiftMotor.ConfigFactoryDefault();
+
+  // activate break mode
+  flMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+  frMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+  brMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+  blMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+  rLiftMotor.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+  lLiftMotor.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+
+  // Limit for drive train motors
+  frMotor.SetSmartCurrentLimit(40);
+  brMotor.SetSmartCurrentLimit(40);
+  flMotor.SetSmartCurrentLimit(40);
+  blMotor.SetSmartCurrentLimit(40);
+}
 // function for running top launcher
 // double launcherSpeed - specify percentage of launcher speed.
 // bool sameDir - specify if you would like the launchers to move in the same direction.
@@ -317,11 +340,8 @@ void Robot::RobotInit()
 
   drivechainPID.SetTolerance(2, 2);
 
-  // Limit for drive train motors
-  frMotor.SetSmartCurrentLimit(40);
-  brMotor.SetSmartCurrentLimit(40);
-  flMotor.SetSmartCurrentLimit(40);
-  blMotor.SetSmartCurrentLimit(40);
+  // run motor config
+  motorInit();
 
   brMotor.Follow(frMotor);
   blMotor.Follow(flMotor);
