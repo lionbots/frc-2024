@@ -317,11 +317,6 @@ void Robot::RobotInit()
 
   drivechainPID.SetTolerance(2, 2);
 
-  // reset the configuration parameters
-  frMotor.RestoreFactoryDefaults();
-  flMotor.RestoreFactoryDefaults();
-  brMotor.RestoreFactoryDefaults();
-  blMotor.RestoreFactoryDefaults();
   // Limit for drive train motors
   frMotor.SetSmartCurrentLimit(40);
   brMotor.SetSmartCurrentLimit(40);
