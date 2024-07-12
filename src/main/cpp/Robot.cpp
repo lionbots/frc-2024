@@ -114,20 +114,20 @@ void autoLeave()
 // Auto for shooting into the speaker then leaving.
 void autoSpeakerLeave()
 {
-  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(350) + autoStartTime)
+  if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(450) + autoStartTime)
   {
     d_drive.ArcadeDrive(0, 0.5, true);
   }
-  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1100) + autoStartTime)
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(1200) + autoStartTime)
   {
     setTopLauncher(1, false);
   }
-  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4000) + autoStartTime)
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(4100) + autoStartTime)
   {
     setTopLauncher(1, false);
     midOutTakeMotor.Set(0.2);
   }
-  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12000) + autoStartTime)
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(12100) + autoStartTime)
   {
     d_drive.ArcadeDrive(0, /* filter.Calculate(units::voltage::volt_t{0.5}).value() */ 0.5, true);
     setTopLauncher(0, false);
