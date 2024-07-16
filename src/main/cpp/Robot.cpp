@@ -54,7 +54,7 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 frc::XboxController manipulatorController(0);
 
 // PID
-frc::PIDController drivechainPID{0.015, 0.0175, 0.005};
+frc::PIDController drivechainPID{0.025, 0, 0.0075}; 
 
 double pidOutput;
 
@@ -312,9 +312,10 @@ void noteAlignment(int tvValue, double txValue, double throttle)
 {
   // Set PID setpoint and tolerance
   drivechainPID.SetSetpoint(0);
-  drivechainPID.SetTolerance(2, 2);
+  drivechainPID.SetTolerance(2, 3);
   // Calculate PID output
   pidOutput = drivechainPID.Calculate(txValue);
+  frc::SmartDashboard::PutNumber("PID Output", pidOutput);
   // Check for target and if PID is at setpoint
   if (tvValue && !drivechainPID.AtSetpoint() && (txValue > 1.5 || txValue < -1.5))
   {
