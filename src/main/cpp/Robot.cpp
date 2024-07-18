@@ -54,7 +54,7 @@ ctre::phoenix::motorcontrol::can::TalonSRX lLiftMotor{10};
 frc::XboxController manipulatorController(0);
 
 // PID
-frc::PIDController drivechainPID{0.025, 0, 0.0075}; 
+frc::PIDController drivechainPID{0.025, 0.02, 0.0075}; 
 
 double pidOutput;
 
