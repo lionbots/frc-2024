@@ -165,7 +165,7 @@ void autoDelayedSpeaker()
   {
     d_drive.ArcadeDrive(0, 0, false);
   }
-  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7350) + autoStartTime)
+  else if (std::chrono::high_resolution_clock::now() < std::chrono::milliseconds(7450) + autoStartTime)
   {
     d_drive.ArcadeDrive(0, 0.5, false);
   }
@@ -239,27 +239,22 @@ void eject(bool ejectStatus)
 }
 
 // lifter function
-void lifter(double rSideSpeed, double lSideSpeed)
+void lifter(bool liftUp, bool liftDown)
 {
-  // Invert controls
-  lSideSpeed *= -1;
-  rSideSpeed *= -1;
-  // Right Lifter
-  if (rSideSpeed > 0.05 || rSideSpeed < -0.05)
+  // Lift Up
+  if (liftUp)
   {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rSideSpeed);
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
+  }
+  else if (liftDown)
+  {
+    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
+    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
   }
   else
   {
     rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
-  }
-  // Left Lifter
-  if (lSideSpeed > 0.05 || lSideSpeed < -0.05)
-  {
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lSideSpeed);
-  }
-  else
-  {
     lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
   }
 }
@@ -433,8 +428,8 @@ void Robot::TeleopPeriodic()
   /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
   /* Eject - Left Bumber*/ bool lBumper = manipulatorController.GetLeftBumper();
 
-  /* Right Lifter - Right Joystick*/ double rJoyStick = manipulatorController.GetRightY();
-  /* Left Lifter - Left Joystick*/ double lJoyStick = manipulatorController.GetLeftY();
+  /* Right Lifter - Right Joystick*/ double yButton = manipulatorController.GetYButton();
+  /* Left Lifter - Left Joystick*/ double aButton = manipulatorController.GetAButton();
 
   // Limelight Values, pulled from published network tables.
   int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
@@ -452,7 +447,7 @@ void Robot::TeleopPeriodic()
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
-  lifter(rJoyStick, lJoyStick);
+  lifter(yButton, aButton);
 }
 void Robot::DisabledInit() {}
 
