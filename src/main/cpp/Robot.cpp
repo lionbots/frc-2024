@@ -269,11 +269,12 @@ void backupDriveSystem(double forwardSpd, double backwardSpd, double dir, bool s
 {
 
   // Reduce turning sensitivity
-  dir *= 0.4;
+  dir *= 0.6;
   if (slowDown)
   {
     forwardSpd *= 0.3;
     backwardSpd *= 0.3;
+    dir *= 0.5;
   }
 
   // Forward and turning
