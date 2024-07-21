@@ -212,12 +212,17 @@ void intake(double intakeMotorSpeed)
 }
 
 // intake and outtake function
-void outake(double outTakeMotorSpeed)
+void outake(double outTakeMotorSpeed, bool slowShot)
 {
   // Outtake
   if (outTakeMotorSpeed > 0)
   {
     setTopLauncher(outTakeMotorSpeed, false);
+    midOutTakeMotor.Set(0.2);
+  }
+  else if (slowShot)
+  {
+    setTopLauncher(0.7, false);
     midOutTakeMotor.Set(0.2);
   }
   else
@@ -454,6 +459,7 @@ void Robot::TeleopPeriodic()
 
   // Manipulator controller
   /* Speaker Outtake - Right Trigger*/ double rTrigger = manipulatorController.GetRightTriggerAxis();
+  /* Weaker Outtake - B Button */ bool bButton = manipulatorController.GetBButton();
   /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
   /* Eject - Left Bumber*/ bool lBumper = manipulatorController.GetLeftBumper();
 
@@ -477,7 +483,7 @@ void Robot::TeleopPeriodic()
     backupDriveSystem(driveControllerRightTrigger, driveControllerLeftTrigger, driveControllerLeftJoyStickX, driveControllerRightBumper);
   }
   intake(lTrigger);
-  outake(rTrigger);
+  outake(rTrigger, bButton);
   eject(lBumper);
   lifter(yButton, aButton, startButton, lJoystick, rJoystick);
 }
