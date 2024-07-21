@@ -57,6 +57,7 @@ frc::XboxController manipulatorController(0);
 frc::PIDController drivechainPID{0.017, 0.02, 0.0085}; 
 
 double pidOutput;
+bool liftersToggled = false;
 
 void motorInit() {
   // reset the configuration parameters
@@ -239,23 +240,51 @@ void eject(bool ejectStatus)
 }
 
 // lifter function
-void lifter(bool liftUp, bool liftDown)
+void lifter(bool liftUp, bool liftDown, bool toggleLifters, double lLifter, double rLifter)
 {
-  // Lift Up
-  if (liftUp)
+  // Toggle Lifters between individual and synchronized
+  if(toggleLifters)
   {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
+    liftersToggled = !liftersToggled;
   }
-  else if (liftDown)
+
+  // Lift Up
+  if(!liftersToggled)
   {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
+    if (liftUp)
+    {
+      rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
+      lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, -1);
+    }
+    // Lift Down
+    else if (liftDown)
+    {
+      rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
+      lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 1);
+    }
+    else
+    {
+      rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+      lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+    }
   }
   else
   {
-    rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
-    lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+    if(lLifter > 0.05 || lLifter < -0.05)
+    {
+      lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, lLifter);
+    } else
+    {
+      lLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+    }
+    
+    if (rLifter > 0.05 || rLifter < -0.05)
+    {
+      rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, rLifter);
+    } else
+    {
+      rLiftMotor.Set(ctre::phoenix::motorcontrol::TalonSRXControlMode::PercentOutput, 0);
+    }
   }
 }
 
@@ -428,8 +457,11 @@ void Robot::TeleopPeriodic()
   /* Intake  - Left Trigger*/ double lTrigger = manipulatorController.GetLeftTriggerAxis();
   /* Eject - Left Bumber*/ bool lBumper = manipulatorController.GetLeftBumper();
 
-  /* Right Lifter - Right Joystick*/ double yButton = manipulatorController.GetYButton();
-  /* Left Lifter - Left Joystick*/ double aButton = manipulatorController.GetAButton();
+  /* Lifter Up - Y Button */ double yButton = manipulatorController.GetYButton();
+  /* Lifter Down - A Button */ double aButton = manipulatorController.GetAButton();
+  /* Left Lifter - Left Joystick */ double lJoystick = manipulatorController.GetLeftY();
+  /* Right Lifter - Right Joystick */ double rJoystick = manipulatorController.GetRightY();
+  /* Start Button - Lifter Toggle */ bool startButton = manipulatorController.GetStartButtonPressed();
 
   // Limelight Values, pulled from published network tables.
   int tv = nt::NetworkTableInstance::GetDefault().GetTable("limelight")->GetNumber("tv", 0.0);
@@ -447,7 +479,7 @@ void Robot::TeleopPeriodic()
   intake(lTrigger);
   outake(rTrigger);
   eject(lBumper);
-  lifter(yButton, aButton);
+  lifter(yButton, aButton, startButton, lJoystick, rJoystick);
 }
 void Robot::DisabledInit() {}
 
